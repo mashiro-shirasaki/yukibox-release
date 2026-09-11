@@ -1,477 +1,1003 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>YukiBox — Local-first image reference library for artists</title>
-<meta name="description" content="YukiBox is a local-first, tag-based image reference manager for artists. Collect, tag and rediscover your visual references on Windows, macOS and Linux. No cloud, no account.">
-<meta name="theme-color" content="#0b0f14">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://mashiro-shirasaki.github.io/yukibox-release/">
-<meta property="og:title" content="YukiBox — Local-first image reference library for artists">
-<meta property="og:description" content="Collect, tag and rediscover your visual references on Windows, macOS and Linux. No cloud, no account.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='8' y='24' width='84' height='60' rx='14' fill='%2338bdf8'/><rect x='20' y='8' width='60' height='22' rx='10' fill='%237dd3fc'/></svg>">
-<style>
-  :root{
-    --bg:#0b0f14; --panel:#111823; --panel-2:#0e141d; --line:#1e2936;
-    --text:#e6edf3; --muted:#93a1b0; --accent:#7dd3fc; --accent-2:#38bdf8;
-    --radius:14px;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    background:var(--bg); color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,
-      "Noto Sans","Noto Sans SC","Noto Sans JP","PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif;
-    font-size:16px;line-height:1.65;
-    -webkit-font-smoothing:antialiased;
-  }
-  html[lang="zh-CN"] body,html[lang="ja"] body{line-height:1.75}
-  html[lang="zh-CN"] h1,html[lang="ja"] h1{letter-spacing:0;line-height:1.22}
-  a{color:var(--accent);text-decoration:none}
-  /* 水平内边距用 clamp：窄屏 20px、宽屏最多 32px，任何视口都不贴边 */
-  .wrap{max-width:1080px;margin:0 auto;padding:0 clamp(20px,4vw,32px)}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YukiBox — Local-first image reference library for artists</title>
+  <meta name="description"
+    content="YukiBox is a local-first, tag-based image reference manager for artists. Collect, tag and rediscover your visual references on Windows, macOS and Linux. No cloud, no account.">
+  <meta name="theme-color" content="#0b0f14">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mashiro-shirasaki.github.io/yukibox-release/">
+  <meta property="og:title" content="YukiBox — Local-first image reference library for artists">
+  <meta property="og:description"
+    content="Collect, tag and rediscover your visual references on Windows, macOS and Linux. No cloud, no account.">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='8' y='24' width='84' height='60' rx='14' fill='%2338bdf8'/><rect x='20' y='8' width='60' height='22' rx='10' fill='%237dd3fc'/></svg>">
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #111823;
+      --panel-2: #0e141d;
+      --line: #1e2936;
+      --text: #e6edf3;
+      --muted: #93a1b0;
+      --accent: #7dd3fc;
+      --accent-2: #38bdf8;
+      --radius: 14px;
+    }
 
-  /* ---------- nav ---------- */
-  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);
-      background:rgba(11,15,20,.78);border-bottom:1px solid var(--line)}
-  .nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:var(--text)}
-  .brand .box{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      position:relative;flex:none}
-  .brand .box::after{content:"";position:absolute;inset:4px 4px 10px;border-radius:5px;background:rgba(255,255,255,.35)}
-  .nav-links{display:flex;gap:22px;align-items:center;font-size:14.5px}
-  .nav-links a{color:var(--muted)} .nav-links a:hover{color:var(--text)}
-  .lang{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
-  .lang button{background:transparent;border:0;color:var(--muted);font-size:12.5px;
-      padding:5px 10px;cursor:pointer;font-family:inherit}
-  .lang button:hover{color:var(--text)}
-  .lang button.on{background:rgba(56,189,248,.14);color:var(--accent)}
-  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15px;
-       padding:10px 20px;border-radius:10px;border:1px solid transparent;cursor:pointer;
-       transition:transform .15s ease, box-shadow .15s ease, background .15s ease}
-  .btn-primary{background:linear-gradient(135deg,var(--accent-2),#0ea5e9);color:#04121d}
-  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(56,189,248,.28)}
-  .btn-ghost{border-color:var(--line);color:var(--text);background:transparent}
-  .btn-ghost:hover{background:var(--panel)}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
-  /* ---------- hero ---------- */
-  header{position:relative;overflow:hidden;
-    background:
-      radial-gradient(700px 340px at 78% -10%, rgba(56,189,248,.16), transparent 65%),
-      radial-gradient(560px 300px at 12% 110%, rgba(125,211,252,.10), transparent 60%);
-    border-bottom:1px solid var(--line)}
-  /* ⚠️ 只用 padding-block：若写成 padding 简写会覆盖 .wrap 的水平内边距，
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+        "Noto Sans", "Noto Sans SC", "Noto Sans JP", "PingFang SC", "Hiragino Sans", "Microsoft YaHei", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html[lang="zh-CN"] body,
+    html[lang="ja"] body {
+      line-height: 1.75
+    }
+
+    html[lang="zh-CN"] h1,
+    html[lang="ja"] h1 {
+      letter-spacing: 0;
+      line-height: 1.22
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none
+    }
+
+    /* 水平内边距用 clamp：窄屏 20px、宽屏最多 32px，任何视口都不贴边 */
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 clamp(20px, 4vw, 32px)
+    }
+
+    /* ---------- nav ---------- */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+      background: rgba(11, 15, 20, .78);
+      border-bottom: 1px solid var(--line)
+    }
+
+    .nav-in {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text)
+    }
+
+    .brand .box {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      position: relative;
+      flex: none
+    }
+
+    .brand .box::after {
+      content: "";
+      position: absolute;
+      inset: 4px 4px 10px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, .35)
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 22px;
+      align-items: center;
+      font-size: 14.5px
+    }
+
+    .nav-links a {
+      color: var(--muted)
+    }
+
+    .nav-links a:hover {
+      color: var(--text)
+    }
+
+    .lang {
+      display: flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      flex: none
+    }
+
+    .lang button {
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: inherit
+    }
+
+    .lang button:hover {
+      color: var(--text)
+    }
+
+    .lang button.on {
+      background: rgba(56, 189, 248, .14);
+      color: var(--accent)
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-2), #0ea5e9);
+      color: #04121d
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(56, 189, 248, .28)
+    }
+
+    .btn-ghost {
+      border-color: var(--line);
+      color: var(--text);
+      background: transparent
+    }
+
+    .btn-ghost:hover {
+      background: var(--panel)
+    }
+
+    /* ---------- hero ---------- */
+    header {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(700px 340px at 78% -10%, rgba(56, 189, 248, .16), transparent 65%),
+        radial-gradient(560px 300px at 12% 110%, rgba(125, 211, 252, .10), transparent 60%);
+      border-bottom: 1px solid var(--line)
+    }
+
+    /* ⚠️ 只用 padding-block：若写成 padding 简写会覆盖 .wrap 的水平内边距，
      导致 hero 内容贴住视口左右边缘 */
-  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;padding-block:88px 72px}
-  .kicker{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--accent);
-      border:1px solid rgba(125,211,252,.35);border-radius:999px;padding:5px 14px;margin-bottom:20px;
-      background:rgba(56,189,248,.07)}
-  h1{font-size:clamp(30px,5vw,52px);line-height:1.12;letter-spacing:-.02em;font-weight:800}
-  h1 .grad{background:linear-gradient(120deg,var(--accent),var(--accent-2) 60%,#818cf8);
-      -webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{margin:20px 0 30px;font-size:18px;color:var(--muted);max-width:34em}
-  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-  .meta-line{margin-top:16px;font-size:13.5px;color:var(--muted)}
-  .meta-line b{color:var(--accent);font-weight:600}
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 56px;
+      align-items: center;
+      padding-block: 88px 72px
+    }
 
-  /* ---------- mockup ---------- */
-  .mock{border:1px solid var(--line);border-radius:16px;background:var(--panel);
-        box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden;transform:rotate(.6deg)}
-  .mock-bar{display:flex;gap:7px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--panel-2)}
-  .mock-bar i{width:11px;height:11px;border-radius:50%;background:#263241}
-  .mock-bar i:nth-child(1){background:#f87171}.mock-bar i:nth-child(2){background:#fbbf24}.mock-bar i:nth-child(3){background:#34d399}
-  .mock-body{display:grid;grid-template-columns:150px 1fr;min-height:280px}
-  .mock-side{border-right:1px solid var(--line);padding:14px 12px;background:var(--panel-2);
-      display:flex;flex-direction:column;gap:8px}
-  .mock-side b{font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:600;margin-bottom:2px}
-  .tag-pill{font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-  .tag-pill.on{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.5);color:var(--accent)}
-  .mock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px}
-  .thumb{aspect-ratio:1;border-radius:10px;position:relative;overflow:hidden}
-  .thumb::after{content:"";position:absolute;left:8px;bottom:8px;width:34px;height:8px;border-radius:99px;background:rgba(255,255,255,.5)}
-  .t1{background:linear-gradient(135deg,#1e3a5f,#38bdf8)} .t2{background:linear-gradient(135deg,#312e5f,#818cf8)}
-  .t3{background:linear-gradient(135deg,#134e4a,#2dd4bf)} .t4{background:linear-gradient(135deg,#4c1d3d,#f472b6)}
-  .t5{background:linear-gradient(135deg,#3f3f46,#a1a1aa)} .t6{background:linear-gradient(135deg,#422006,#fbbf24)}
-  .thumb.sel{outline:2px solid var(--accent);outline-offset:-2px}
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--accent);
+      border: 1px solid rgba(125, 211, 252, .35);
+      border-radius: 999px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+      background: rgba(56, 189, 248, .07)
+    }
 
-  /* ---------- sections ---------- */
-  section{padding:76px 0}
-  .sec-head{max-width:640px;margin-bottom:44px}
-  .sec-head h2{font-size:clamp(26px,3.4vw,36px);letter-spacing:-.015em;font-weight:750}
-  html[lang="zh-CN"] .sec-head h2,html[lang="ja"] .sec-head h2{letter-spacing:0}
-  .sec-head p{margin-top:12px;color:var(--muted);font-size:16.5px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:18px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
-  .card .ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-      background:rgba(56,189,248,.12);color:var(--accent);margin-bottom:14px}
-  .card h3{font-size:16.5px;font-weight:700;margin-bottom:8px}
-  .card p{font-size:14.5px;color:var(--muted)}
+    h1 {
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.12;
+      letter-spacing: -.02em;
+      font-weight: 800
+    }
 
-  /* ---------- download ---------- */
-  #download{background:
-      radial-gradient(600px 300px at 50% 0%, rgba(56,189,248,.12), transparent 70%);
-      border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .dl-box{max-width:760px;margin:0 auto;text-align:center}
-  .dl-version{font-size:14px;color:var(--muted);margin-bottom:26px}
-  .dl-version b{color:var(--accent)}
-  .dl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
-  .dl-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-      padding:26px 18px;display:block;color:var(--text);transition:transform .15s,border-color .15s}
-  .dl-card:hover{transform:translateY(-3px);border-color:rgba(56,189,248,.55)}
-  .dl-card .os{font-weight:700;font-size:16px;margin:12px 0 4px}
-  .dl-card .fmt{font-size:13px;color:var(--muted)}
-  .dl-card svg{color:var(--accent)}
-  .rec-badge{display:none;position:absolute;top:10px;right:10px;font-size:11px;font-weight:600;
-      color:var(--accent);background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.5);
-      border-radius:999px;padding:2px 9px}
-  .dl-card.rec .rec-badge{display:inline-block}
-  .dl-note{margin-top:22px;font-size:13.5px;color:var(--muted)}
+    h1 .grad {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2) 60%, #818cf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
 
-  footer{padding:36px 0 44px;color:var(--muted);font-size:14px}
-  .foot-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  footer a{color:var(--muted)} footer a:hover{color:var(--text)}
+    .sub {
+      margin: 20px 0 30px;
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 34em
+    }
 
-  @media (max-width:860px){
-    .hero{grid-template-columns:1fr;padding-block:60px 56px;gap:40px}
-    .nav-links a:not(.btn){display:none}
-  }
-</style>
+    .hero-cta {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .meta-line {
+      margin-top: 16px;
+      font-size: 13.5px;
+      color: var(--muted)
+    }
+
+    .meta-line b {
+      color: var(--accent);
+      font-weight: 600
+    }
+
+    /* ---------- mockup ---------- */
+    .mock {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+      overflow: hidden;
+      transform: rotate(.6deg)
+    }
+
+    .mock-bar {
+      display: flex;
+      gap: 7px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-2)
+    }
+
+    .mock-bar i {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #263241
+    }
+
+    .mock-bar i:nth-child(1) {
+      background: #f87171
+    }
+
+    .mock-bar i:nth-child(2) {
+      background: #fbbf24
+    }
+
+    .mock-bar i:nth-child(3) {
+      background: #34d399
+    }
+
+    .mock-body {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      min-height: 280px
+    }
+
+    .mock-side {
+      border-right: 1px solid var(--line);
+      padding: 14px 12px;
+      background: var(--panel-2);
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .mock-side b {
+      font-size: 11px;
+      letter-spacing: .12em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 2px
+    }
+
+    .tag-pill {
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted)
+    }
+
+    .tag-pill.on {
+      background: rgba(56, 189, 248, .14);
+      border-color: rgba(56, 189, 248, .5);
+      color: var(--accent)
+    }
+
+    .mock-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 14px
+    }
+
+    .thumb {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .thumb::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      width: 34px;
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .5)
+    }
+
+    .t1 {
+      background: linear-gradient(135deg, #1e3a5f, #38bdf8)
+    }
+
+    .t2 {
+      background: linear-gradient(135deg, #312e5f, #818cf8)
+    }
+
+    .t3 {
+      background: linear-gradient(135deg, #134e4a, #2dd4bf)
+    }
+
+    .t4 {
+      background: linear-gradient(135deg, #4c1d3d, #f472b6)
+    }
+
+    .t5 {
+      background: linear-gradient(135deg, #3f3f46, #a1a1aa)
+    }
+
+    .t6 {
+      background: linear-gradient(135deg, #422006, #fbbf24)
+    }
+
+    .thumb.sel {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px
+    }
+
+    /* ---------- sections ---------- */
+    section {
+      padding: 76px 0
+    }
+
+    .sec-head {
+      max-width: 640px;
+      margin-bottom: 44px
+    }
+
+    .sec-head h2 {
+      font-size: clamp(26px, 3.4vw, 36px);
+      letter-spacing: -.015em;
+      font-weight: 750
+    }
+
+    html[lang="zh-CN"] .sec-head h2,
+    html[lang="ja"] .sec-head h2 {
+      letter-spacing: 0
+    }
+
+    .sec-head p {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 16.5px
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+      gap: 18px
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px
+    }
+
+    .card .ic {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(56, 189, 248, .12);
+      color: var(--accent);
+      margin-bottom: 14px
+    }
+
+    .card h3 {
+      font-size: 16.5px;
+      font-weight: 700;
+      margin-bottom: 8px
+    }
+
+    .card p {
+      font-size: 14.5px;
+      color: var(--muted)
+    }
+
+    /* ---------- download ---------- */
+    #download {
+      background:
+        radial-gradient(600px 300px at 50% 0%, rgba(56, 189, 248, .12), transparent 70%);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line)
+    }
+
+    .dl-box {
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center
+    }
+
+    .dl-version {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 26px
+    }
+
+    .dl-version b {
+      color: var(--accent)
+    }
+
+    .dl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px
+    }
+
+    .dl-card {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 26px 18px;
+      display: block;
+      color: var(--text);
+      transition: transform .15s, border-color .15s
+    }
+
+    .dl-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(56, 189, 248, .55)
+    }
+
+    .dl-card .os {
+      font-weight: 700;
+      font-size: 16px;
+      margin: 12px 0 4px
+    }
+
+    .dl-card .fmt {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .dl-card svg {
+      color: var(--accent)
+    }
+
+    .rec-badge {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(56, 189, 248, .14);
+      border: 1px solid rgba(56, 189, 248, .5);
+      border-radius: 999px;
+      padding: 2px 9px
+    }
+
+    .dl-card.rec .rec-badge {
+      display: inline-block
+    }
+
+    .dl-note {
+      margin-top: 22px;
+      font-size: 13.5px;
+      color: var(--muted)
+    }
+
+    footer {
+      padding: 36px 0 44px;
+      color: var(--muted);
+      font-size: 14px
+    }
+
+    .foot-in {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap
+    }
+
+    footer a {
+      color: var(--muted)
+    }
+
+    footer a:hover {
+      color: var(--text)
+    }
+
+    @media (max-width:860px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding-block: 60px 56px;
+        gap: 40px
+      }
+
+      .nav-links a:not(.btn) {
+        display: none
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<nav>
-  <div class="wrap nav-in">
-    <a class="brand" href="#"><span class="box"></span>YukiBox</a>
-    <div class="nav-links">
-      <a href="#features" data-i18n="nav.features">Features</a>
-      <a href="#download" data-i18n="nav.download">Download</a>
-      <a href="https://github.com/mashiro-shirasaki/yukibox" target="_blank" rel="noopener" data-i18n="nav.github">GitHub</a>
-      <div class="lang" role="group" aria-label="Language / 语言">
-        <button type="button" data-lang="zh" title="中文">中</button>
-        <button type="button" data-lang="en" title="English">EN</button>
-        <button type="button" data-lang="ja" title="日本語">日</button>
+  <nav>
+    <div class="wrap nav-in">
+      <a class="brand" href="#"><span class="box"></span>YukiBox</a>
+      <div class="nav-links">
+        <a href="#features" data-i18n="nav.features">Features</a>
+        <a href="#download" data-i18n="nav.download">Download</a>
+        <a href="https://github.com/mashiro-shirasaki/yukibox" target="_blank" rel="noopener"
+          data-i18n="nav.github">GitHub</a>
+        <div class="lang" role="group" aria-label="Language / 语言">
+          <button type="button" data-lang="en" title="English">EN</button>
+          <button type="button" data-lang="ja" title="日本語">日</button>
+          <button type="button" data-lang="zh" title="中文">中</button>
+        </div>
+        <a class="btn btn-primary" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest"
+          target="_blank" rel="noopener" data-i18n="nav.cta">Download</a>
       </div>
-      <a class="btn btn-primary" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest" target="_blank" rel="noopener" data-i18n="nav.cta">Download</a>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<header>
-  <div class="wrap hero">
-    <div>
-      <span class="kicker" data-i18n="hero.kicker">❄ Local-first · Tag-based · Cross-platform</span>
-      <h1 data-i18n-html="hero.h1">Your visual references,<br><span class="grad">boxed and organized.</span></h1>
-      <p class="sub" data-i18n="hero.sub">YukiBox is a local image reference library for artists. Collect artwork, tag it your way, and rediscover it in seconds — everything stays on your own machine.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest" target="_blank" rel="noopener">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span data-i18n="hero.cta1">Get YukiBox</span>
+  <header>
+    <div class="wrap hero">
+      <div>
+        <span class="kicker" data-i18n="hero.kicker">❄ Local-first · Tag-based · Cross-platform</span>
+        <h1 data-i18n-html="hero.h1">Your visual references,<br><span class="grad">boxed and organized.</span></h1>
+        <p class="sub" data-i18n="hero.sub">YukiBox is a local image reference library for artists. Collect artwork, tag
+          it your way, and rediscover it in seconds — everything stays on your own machine.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest"
+            target="_blank" rel="noopener">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span data-i18n="hero.cta1">Get YukiBox</span>
+          </a>
+          <a class="btn btn-ghost" href="#features" data-i18n="hero.cta2">See features</a>
+        </div>
+        <p class="meta-line"><span data-i18n="hero.meta">Free &amp; open under MIT ·</span> <b class="js-version">…</b>
+          · Windows · macOS · Linux</p>
+      </div>
+
+      <div class="mock" aria-hidden="true">
+        <div class="mock-bar"><i></i><i></i><i></i></div>
+        <div class="mock-body">
+          <div class="mock-side">
+            <b data-i18n="mock.library">LIBRARY</b>
+            <span class="tag-pill on" data-i18n="mock.all">All images</span>
+            <span class="tag-pill" data-i18n="mock.fav">✦ favorite</span>
+            <span class="tag-pill" data-i18n="mock.bgsky">bg · sky</span>
+            <span class="tag-pill" data-i18n="mock.charpose">char · pose</span>
+            <span class="tag-pill" data-i18n="mock.palette">palette</span>
+            <span class="tag-pill" data-i18n="mock.anatomy">anatomy</span>
+          </div>
+          <div class="mock-grid">
+            <div class="thumb t1"></div>
+            <div class="thumb t2 sel"></div>
+            <div class="thumb t3"></div>
+            <div class="thumb t4"></div>
+            <div class="thumb t5"></div>
+            <div class="thumb t6"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 data-i18n="feat.title">Everything a reference library should do</h2>
+        <p data-i18n="feat.sub">Built around one idea: your references are yours. No accounts, no upload, no lock-in —
+          just fast local tools that stay out of your way.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg></div>
+          <h3 data-i18n="f1.t">Local-first &amp; private</h3>
+          <p data-i18n="f1.d">Images and the SQLite database live on your own disk. No account, no cloud, no telemetry —
+            fully usable offline.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+              <circle cx="7.5" cy="7.5" r="1" fill="currentColor" />
+            </svg></div>
+          <h3 data-i18n="f2.t">Tag everything</h3>
+          <p data-i18n="f2.d">Hierarchical tags with categories. Drag images onto a tag to file them — with a
+            confirmation step so nothing lands by accident.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg></div>
+          <h3 data-i18n="f3.t">Drag &amp; drop import</h3>
+          <p data-i18n="f3.d">Drop in files or entire folders. For every import you choose: copy into the library
+            folder, or link images where they live.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 3a2 2 0 0 0-2 2" />
+              <path d="M19 3a2 2 0 0 1 2 2" />
+              <path d="M21 19a2 2 0 0 1-2 2" />
+              <path d="M5 21a2 2 0 0 1-2-2" />
+              <rect x="7" y="7" width="10" height="10" rx="1" />
+            </svg></div>
+          <h3 data-i18n="f4.t">Marquee select &amp; batch ops</h3>
+          <p data-i18n="f4.d">Eagle-style box selection across the grid. Tag, move or delete dozens of images in one
+            gesture.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
+            </svg></div>
+          <h3 data-i18n="f5.t">Smart color extraction</h3>
+          <p data-i18n="f5.d">Dominant palettes are extracted from every image automatically — spot the right mood at a
+            glance.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              <line x1="11" y1="8" x2="11" y2="14" />
+              <line x1="8" y1="11" x2="14" y2="11" />
+            </svg></div>
+          <h3 data-i18n="f6.t">Pixel-level viewer</h3>
+          <p data-i18n="f6.d">A smooth zoom &amp; pan viewer for checking linework, edges and details up close.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2" />
+              <line x1="6" y1="10" x2="6" y2="10" />
+              <line x1="10" y1="10" x2="10" y2="10" />
+              <line x1="14" y1="10" x2="14" y2="10" />
+              <line x1="18" y1="10" x2="18" y2="10" />
+              <line x1="7" y1="14" x2="17" y2="14" />
+            </svg></div>
+          <h3 data-i18n="f7.t">Keyboard-driven</h3>
+          <p data-i18n="f7.d">Shortcuts for filtering, tagging and navigation — organize hundreds of images without
+            leaving the keyboard.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg></div>
+          <h3 data-i18n="f8.t">Cross-platform</h3>
+          <p data-i18n="f8.d">Native builds for Windows 10+, macOS 11+ (Apple Silicon &amp; Intel) and Linux (AppImage).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="download">
+    <div class="wrap dl-box">
+      <div class="sec-head" style="margin:0 auto 10px;text-align:center">
+        <h2 data-i18n="dl.title">Download YukiBox</h2>
+        <p data-i18n="dl.sub">Grab the latest build from the release page. Installs in seconds — your library stays
+          yours.</p>
+      </div>
+      <p class="dl-version"><span data-i18n="dl.latest">Latest version:</span> <b class="js-version">…</b></p>
+      <div class="dl-grid">
+        <a class="dl-card" data-os="win" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest"
+          target="_blank" rel="noopener">
+          <span class="rec-badge" data-i18n="dl.rec">Recommended</span>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>
+          <div class="os">Windows</div>
+          <div class="fmt" data-i18n="dl.win.fmt">Windows 10/11 · 64-bit · Installer (.exe)</div>
         </a>
-        <a class="btn btn-ghost" href="#features" data-i18n="hero.cta2">See features</a>
+        <a class="dl-card" data-os="mac" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest"
+          target="_blank" rel="noopener">
+          <span class="rec-badge" data-i18n="dl.rec">Recommended</span>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06z" />
+            <path d="M10 2c1 .5 2 2 2 5" />
+          </svg>
+          <div class="os">macOS</div>
+          <div class="fmt" data-i18n="dl.mac.fmt">Apple Silicon &amp; Intel · (.dmg)</div>
+        </a>
+        <a class="dl-card" data-os="linux" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest"
+          target="_blank" rel="noopener">
+          <span class="rec-badge" data-i18n="dl.rec">Recommended</span>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
+          </svg>
+          <div class="os">Linux</div>
+          <div class="fmt" data-i18n="dl.linux.fmt">x86-64 · AppImage</div>
+        </a>
       </div>
-      <p class="meta-line"><span data-i18n="hero.meta">Free &amp; open under MIT ·</span> <b class="js-version">…</b> · Windows · macOS · Linux</p>
+      <p class="dl-note" data-i18n-html="dl.note">All builds are unsigned — on macOS you may need to right-click the app
+        → Open on first launch. Source code and older versions live on <a
+          href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener">GitHub
+          Releases</a>.</p>
     </div>
+  </section>
 
-    <div class="mock" aria-hidden="true">
-      <div class="mock-bar"><i></i><i></i><i></i></div>
-      <div class="mock-body">
-        <div class="mock-side">
-          <b data-i18n="mock.library">LIBRARY</b>
-          <span class="tag-pill on" data-i18n="mock.all">All images</span>
-          <span class="tag-pill" data-i18n="mock.fav">✦ favorite</span>
-          <span class="tag-pill" data-i18n="mock.bgsky">bg · sky</span>
-          <span class="tag-pill" data-i18n="mock.charpose">char · pose</span>
-          <span class="tag-pill" data-i18n="mock.palette">palette</span>
-          <span class="tag-pill" data-i18n="mock.anatomy">anatomy</span>
-        </div>
-        <div class="mock-grid">
-          <div class="thumb t1"></div><div class="thumb t2 sel"></div><div class="thumb t3"></div>
-          <div class="thumb t4"></div><div class="thumb t5"></div><div class="thumb t6"></div>
-        </div>
-      </div>
+  <footer>
+    <div class="wrap foot-in">
+      <span data-i18n="foot.left">❄ YukiBox — a local image reference library. MIT License.</span>
+      <span>
+        <a href="https://github.com/mashiro-shirasaki/yukibox" target="_blank" rel="noopener"
+          data-i18n="foot.source">Source</a> ·
+        <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener"
+          data-i18n="foot.releases">Releases</a>
+      </span>
     </div>
-  </div>
-</header>
+  </footer>
 
-<section id="features">
-  <div class="wrap">
-    <div class="sec-head">
-      <h2 data-i18n="feat.title">Everything a reference library should do</h2>
-      <p data-i18n="feat.sub">Built around one idea: your references are yours. No accounts, no upload, no lock-in — just fast local tools that stay out of your way.</p>
-    </div>
-    <div class="grid">
-      <div class="card">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-        <h3 data-i18n="f1.t">Local-first &amp; private</h3>
-        <p data-i18n="f1.d">Images and the SQLite database live on your own disk. No account, no cloud, no telemetry — fully usable offline.</p>
-      </div>
-      <div class="card">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor"/></svg></div>
-        <h3 data-i18n="f2.t">Tag everything</h3>
-        <p data-i18n="f2.d">Hierarchical tags with categories. Drag images onto a tag to file them — with a confirmation step so nothing lands by accident.</p>
-      </div>
-      <div class="card">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-        <h3 data-i18n="f3.t">Drag &amp; drop import</h3>
-        <p data-i18n="f3.d">Drop in files or entire folders. For every import you choose: copy into the library folder, or link images where they live.</p>
-      </div>
-      <div class="card">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3a2 2 0 0 0-2 2"/><path d="M19 3a2 2 0 0 1 2 2"/><path d="M21 19a2 2 0 0 1-2 2"/><path d="M5 21a2 2 0 0 1-2-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg></div>
-        <h3 data-i18n="f4.t">Marquee select &amp; batch ops</h3>
-        <p data-i18n="f4.d">Eagle-style box selection across the grid. Tag, move or delete dozens of images in one gesture.</p>
-      </div>
-      <div class="card">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
-        <h3 data-i18n="f5.t">Smart color extraction</h3>
-        <p data-i18n="f5.d">Dominant palettes are extracted from every image automatically — spot the right mood at a glance.</p>
-      </div>
-      <div class="card">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
-        <h3 data-i18n="f6.t">Pixel-level viewer</h3>
-        <p data-i18n="f6.d">A smooth zoom &amp; pan viewer for checking linework, edges and details up close.</p>
-      </div>
-      <div class="card">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg></div>
-        <h3 data-i18n="f7.t">Keyboard-driven</h3>
-        <p data-i18n="f7.d">Shortcuts for filtering, tagging and navigation — organize hundreds of images without leaving the keyboard.</p>
-      </div>
-      <div class="card">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-        <h3 data-i18n="f8.t">Cross-platform</h3>
-        <p data-i18n="f8.d">Native builds for Windows 10+, macOS 11+ (Apple Silicon &amp; Intel) and Linux (AppImage).</p>
-      </div>
-    </div>
-  </div>
-</section>
+  <script>
+    /* ============================================================
+       YukiBox site i18n — en (default) / zh-CN / ja
+       data-i18n       -> textContent
+       data-i18n-html  -> innerHTML   (only for trusted, self-written keys)
 
-<section id="download">
-  <div class="wrap dl-box">
-    <div class="sec-head" style="margin:0 auto 10px;text-align:center">
-      <h2 data-i18n="dl.title">Download YukiBox</h2>
-      <p data-i18n="dl.sub">Grab the latest build from the release page. Installs in seconds — your library stays yours.</p>
-    </div>
-    <p class="dl-version"><span data-i18n="dl.latest">Latest version:</span> <b class="js-version">…</b></p>
-    <div class="dl-grid">
-      <a class="dl-card" data-os="win" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest" target="_blank" rel="noopener">
-        <span class="rec-badge" data-i18n="dl.rec">Recommended</span>
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <div class="os">Windows</div><div class="fmt" data-i18n="dl.win.fmt">Windows 10/11 · 64-bit · Installer (.exe)</div>
-      </a>
-      <a class="dl-card" data-os="mac" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest" target="_blank" rel="noopener">
-        <span class="rec-badge" data-i18n="dl.rec">Recommended</span>
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
-        <div class="os">macOS</div><div class="fmt" data-i18n="dl.mac.fmt">Apple Silicon &amp; Intel · (.dmg)</div>
-      </a>
-      <a class="dl-card" data-os="linux" href="https://github.com/mashiro-shirasaki/yukibox-release/releases/latest" target="_blank" rel="noopener">
-        <span class="rec-badge" data-i18n="dl.rec">Recommended</span>
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
-        <div class="os">Linux</div><div class="fmt" data-i18n="dl.linux.fmt">x86-64 · AppImage</div>
-      </a>
-    </div>
-    <p class="dl-note" data-i18n-html="dl.note">All builds are unsigned — on macOS you may need to right-click the app → Open on first launch. Source code and older versions live on <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener">GitHub Releases</a>.</p>
-  </div>
-</section>
+       默认语言为英文：页面初次加载始终显示英文，
+       只有用户手动点击语言按钮后才会切换并记住选择。
+       ============================================================ */
+    var I18N = {
+      zh: {
+        'meta.title': 'YukiBox — 本地优先的画师图片参考库',
+        'meta.desc': 'YukiBox 是一款本地优先、基于标签的画师参考图管理工具。在 Windows、macOS 与 Linux 上收集、标注并快速找回你的视觉参考。无云端、无需账号。',
+        'nav.features': '特性', 'nav.download': '下载', 'nav.github': 'GitHub', 'nav.cta': '下载',
+        'hero.kicker': '❄ 本地优先 · 标签管理 · 跨平台',
+        'hero.h1': '你的视觉参考图，<br><span class="grad">装盒收纳，即刻找回。</span>',
+        'hero.sub': 'YukiBox 是面向画师的本地图片参考库。收集画作、按自己的方式打标签、几秒内重新找回——所有数据都只留在你自己的电脑上。',
+        'hero.cta1': '获取 YukiBox', 'hero.cta2': '查看特性',
+        'hero.meta': '免费开源 · MIT 许可 ·',
+        'mock.library': '图库', 'mock.all': '全部图片', 'mock.fav': '✦ 收藏',
+        'mock.bgsky': '背景 · 天空', 'mock.charpose': '角色 · 姿势',
+        'mock.palette': '配色', 'mock.anatomy': '人体',
+        'feat.title': '参考库该有的，这里都有了',
+        'feat.sub': '设计理念只有一条：你的参考图属于你自己。不用账号、不上传云端、不被锁定——只有顺手够快的本地工具。',
+        'f1.t': '本地优先，数据自持',
+        'f1.d': '图片与 SQLite 数据库都存在你自己的硬盘里。无账号、无云端、无遥测——离线也能完整使用。',
+        'f2.t': '层级标签体系',
+        'f2.d': '多级标签与分类。把图片拖到标签上即可归类——带确认步骤，绝不误挂。',
+        'f3.t': '拖拽导入',
+        'f3.d': '文件或整个文件夹拖进来即可。每次导入都能选择：复制进图库，或原地链接不占双份空间。',
+        'f4.t': '框选与批量操作',
+        'f4.d': 'Eagle 式自由框选，一次选中一批。打标签、移动、删除，几十张图一个手势搞定。',
+        'f5.t': '智能主色提取',
+        'f5.d': '自动为每张图提取主色板，想要的颜色氛围一眼锁定。',
+        'f6.t': '像素级大图查看',
+        'f6.d': '流畅缩放与平移的大图查看器，线稿、边缘、细节放大细看。',
+        'f7.t': '键盘优先操作',
+        'f7.d': '筛选、打标、导航全有快捷键——成百上千张图，手不用离开键盘。',
+        'f8.t': '三端原生适配',
+        'f8.d': '原生适配 Windows 10+、macOS 11+（Apple Silicon 与 Intel）与 Linux（AppImage）。',
+        'dl.title': '下载 YukiBox',
+        'dl.sub': '从发布页获取最新版本，几秒装好——你的图库始终属于你。',
+        'dl.latest': '最新版本：', 'dl.rec': '当前系统推荐',
+        'dl.win.fmt': 'Windows 10/11 · 64 位 · 安装包 (.exe)',
+        'dl.mac.fmt': 'Apple Silicon 与 Intel · (.dmg)',
+        'dl.linux.fmt': 'x86-64 · AppImage',
+        'dl.note': '所有构建均未签名——macOS 首次打开若被拦截，请右键 App →「打开」。源码与历史版本见 <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener">GitHub Releases</a>。',
+        'foot.left': '❄ YukiBox — 本地图片参考库 · MIT 许可',
+        'foot.source': '源码', 'foot.releases': '发布页'
+      },
+      en: {
+        'meta.title': 'YukiBox — Local-first image reference library for artists',
+        'meta.desc': 'YukiBox is a local-first, tag-based image reference manager for artists. Collect, tag and rediscover your visual references on Windows, macOS and Linux. No cloud, no account.',
+        'nav.features': 'Features', 'nav.download': 'Download', 'nav.github': 'GitHub', 'nav.cta': 'Download',
+        'hero.kicker': '❄ Local-first · Tag-based · Cross-platform',
+        'hero.h1': 'Your visual references,<br><span class="grad">boxed and organized.</span>',
+        'hero.sub': 'YukiBox is a local image reference library for artists. Collect artwork, tag it your way, and rediscover it in seconds — everything stays on your own machine.',
+        'hero.cta1': 'Get YukiBox', 'hero.cta2': 'See features',
+        'hero.meta': 'Free & open under MIT ·',
+        'mock.library': 'LIBRARY', 'mock.all': 'All images', 'mock.fav': '✦ favorite',
+        'mock.bgsky': 'bg · sky', 'mock.charpose': 'char · pose',
+        'mock.palette': 'palette', 'mock.anatomy': 'anatomy',
+        'feat.title': 'Everything a reference library should do',
+        'feat.sub': 'Built around one idea: your references are yours. No accounts, no upload, no lock-in — just fast local tools that stay out of your way.',
+        'f1.t': 'Local-first & private',
+        'f1.d': 'Images and the SQLite database live on your own disk. No account, no cloud, no telemetry — fully usable offline.',
+        'f2.t': 'Tag everything',
+        'f2.d': 'Hierarchical tags with categories. Drag images onto a tag to file them — with a confirmation step so nothing lands by accident.',
+        'f3.t': 'Drag & drop import',
+        'f3.d': 'Drop in files or entire folders. For every import you choose: copy into the library folder, or link images where they live.',
+        'f4.t': 'Marquee select & batch ops',
+        'f4.d': 'Eagle-style box selection across the grid. Tag, move or delete dozens of images in one gesture.',
+        'f5.t': 'Smart color extraction',
+        'f5.d': 'Dominant palettes are extracted from every image automatically — spot the right mood at a glance.',
+        'f6.t': 'Pixel-level viewer',
+        'f6.d': 'A smooth zoom & pan viewer for checking linework, edges and details up close.',
+        'f7.t': 'Keyboard-driven',
+        'f7.d': 'Shortcuts for filtering, tagging and navigation — organize hundreds of images without leaving the keyboard.',
+        'f8.t': 'Cross-platform',
+        'f8.d': 'Native builds for Windows 10+, macOS 11+ (Apple Silicon & Intel) and Linux (AppImage).',
+        'dl.title': 'Download YukiBox',
+        'dl.sub': 'Grab the latest build from the release page. Installs in seconds — your library stays yours.',
+        'dl.latest': 'Latest version:', 'dl.rec': 'Recommended',
+        'dl.win.fmt': 'Windows 10/11 · 64-bit · Installer (.exe)',
+        'dl.mac.fmt': 'Apple Silicon & Intel · (.dmg)',
+        'dl.linux.fmt': 'x86-64 · AppImage',
+        'dl.note': 'All builds are unsigned — on macOS you may need to right-click the app → Open on first launch. Source code and older versions live on <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener">GitHub Releases</a>.',
+        'foot.left': '❄ YukiBox — a local image reference library. MIT License.',
+        'foot.source': 'Source', 'foot.releases': 'Releases'
+      },
+      ja: {
+        'meta.title': 'YukiBox — アーティストのためのローカル画像リファレンス管理',
+        'meta.desc': 'YukiBox はローカル完結・タグベースの画像リファレンス管理アプリ。Windows / macOS / Linux でビジュアル資料を収集・タグ付け・すばやく検索。クラウドもアカウントも不要です。',
+        'nav.features': '機能', 'nav.download': 'ダウンロード', 'nav.github': 'GitHub', 'nav.cta': 'ダウンロード',
+        'hero.kicker': '❄ ローカル完結 · タグ管理 · クロスプラットフォーム',
+        'hero.h1': 'あなたのビジュアル資料を、<br><span class="grad">ひと箱に、整理して。</span>',
+        'hero.sub': 'YukiBox はアーティストのためのローカル画像リファレンスライブラリ。作品を集め、自分流にタグを付け、数秒で再発見——データはすべて自分の PC の中だけ。',
+        'hero.cta1': 'YukiBox を入手', 'hero.cta2': '機能を見る',
+        'hero.meta': 'MIT ライセンス · 無料 ·',
+        'mock.library': 'ライブラリ', 'mock.all': 'すべての画像', 'mock.fav': '✦ お気に入り',
+        'mock.bgsky': '背景 · 空', 'mock.charpose': 'キャラ · ポーズ',
+        'mock.palette': 'パレット', 'mock.anatomy': 'デッサン',
+        'feat.title': 'リファレンス集に必要な機能、すべてここに',
+        'feat.sub': '理念はひとつ：あなたの資料はあなたのもの。アカウント不要・アップロード不要・ロックインなし——軽快なローカルツールだけ。',
+        'f1.t': 'ローカル完結・プライベート',
+        'f1.d': '画像も SQLite データベースもすべて自分のディスク上。アカウント不要、クラウド不要、テレメトリなし——オフラインで完全動作。',
+        'f2.t': 'すべてにタグを',
+        'f2.d': '階層タグとカテゴリに対応。画像をタグにドラッグするだけで分類（確認ステップ付きで誤操作防止）。',
+        'f3.t': 'ドラッグ＆ドロップ取り込み',
+        'f3.d': 'ファイルもフォルダごともドロップするだけ。取り込みのたびに選択：ライブラリへコピー、または元の場所へリンク。',
+        'f4.t': 'なげなわ選択・一括操作',
+        'f4.d': 'Eagle 風のなげなわ選択。タグ付け・移動・削除を数十枚単位でひと操作で。',
+        'f5.t': 'スマート配色抽出',
+        'f5.d': '主要なパレットを画像から自動抽出。ほしい雰囲気の色がひと目で見つかる。',
+        'f6.t': 'ピクセル単位のビューア',
+        'f6.d': 'なめらかなズーム＆パンで、線画・輪郭・ディテールを拡大チェック。',
+        'f7.t': 'キーボードで操作',
+        'f7.d': 'フィルタ・タグ付け・移動にショートカット。数百枚の整理もキーボードから手を離さず。',
+        'f8.t': 'クロスプラットフォーム',
+        'f8.d': 'Windows 10+ / macOS 11+（Apple Silicon & Intel）/ Linux（AppImage）にネイティブ対応。',
+        'dl.title': 'YukiBox をダウンロード',
+        'dl.sub': 'リリースページから最新ビルドを取得。数秒でインストール完了——ライブラリはあなたのもののまま。',
+        'dl.latest': '最新バージョン：', 'dl.rec': 'おすすめ',
+        'dl.win.fmt': 'Windows 10/11 · 64bit · インストーラー (.exe)',
+        'dl.mac.fmt': 'Apple Silicon & Intel · (.dmg)',
+        'dl.linux.fmt': 'x86-64 · AppImage',
+        'dl.note': 'ビルドは未署名です——macOS 初回起動時にブロックされた場合は、アプリを右クリック →「開く」を実行してください。ソースコードと過去バージョンは <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener">GitHub Releases</a> にあります。',
+        'foot.left': '❄ YukiBox — ローカル画像リファレンスライブラリ · MIT ライセンス',
+        'foot.source': 'ソース', 'foot.releases': 'リリース'
+      }
+    };
 
-<footer>
-  <div class="wrap foot-in">
-    <span data-i18n="foot.left">❄ YukiBox — a local image reference library. MIT License.</span>
-    <span>
-      <a href="https://github.com/mashiro-shirasaki/yukibox" target="_blank" rel="noopener" data-i18n="foot.source">Source</a> ·
-      <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener" data-i18n="foot.releases">Releases</a>
-    </span>
-  </div>
-</footer>
+    (function () {
+      var LANGS = ['en', 'ja', 'zh'];
+      var DEFAULT_LANG = 'en';
+      var STORE_KEY = 'yukibox-site-lang';
 
-<script>
-/* ============================================================
-   YukiBox site i18n — zh-CN / en / ja (matches the app locales)
-   data-i18n       -> textContent
-   data-i18n-html  -> innerHTML   (only for trusted, self-written keys)
-   ============================================================ */
-var I18N = {
-  zh: {
-    'meta.title': 'YukiBox — 本地优先的画师图片参考库',
-    'meta.desc': 'YukiBox 是一款本地优先、基于标签的画师参考图管理工具。在 Windows、macOS 与 Linux 上收集、标注并快速找回你的视觉参考。无云端、无需账号。',
-    'nav.features': '特性', 'nav.download': '下载', 'nav.github': 'GitHub', 'nav.cta': '下载',
-    'hero.kicker': '❄ 本地优先 · 标签管理 · 跨平台',
-    'hero.h1': '你的视觉参考图，<br><span class="grad">装盒收纳，即刻找回。</span>',
-    'hero.sub': 'YukiBox 是面向画师的本地图片参考库。收集画作、按自己的方式打标签、几秒内重新找回——所有数据都只留在你自己的电脑上。',
-    'hero.cta1': '获取 YukiBox', 'hero.cta2': '查看特性',
-    'hero.meta': '免费开源 · MIT 许可 ·',
-    'mock.library': '图库', 'mock.all': '全部图片', 'mock.fav': '✦ 收藏',
-    'mock.bgsky': '背景 · 天空', 'mock.charpose': '角色 · 姿势',
-    'mock.palette': '配色', 'mock.anatomy': '人体',
-    'feat.title': '参考库该有的，这里都有了',
-    'feat.sub': '设计理念只有一条：你的参考图属于你自己。不用账号、不上传云端、不被锁定——只有顺手够快的本地工具。',
-    'f1.t': '本地优先，数据自持',
-    'f1.d': '图片与 SQLite 数据库都存在你自己的硬盘里。无账号、无云端、无遥测——离线也能完整使用。',
-    'f2.t': '层级标签体系',
-    'f2.d': '多级标签与分类。把图片拖到标签上即可归类——带确认步骤，绝不误挂。',
-    'f3.t': '拖拽导入',
-    'f3.d': '文件或整个文件夹拖进来即可。每次导入都能选择：复制进图库，或原地链接不占双份空间。',
-    'f4.t': '框选与批量操作',
-    'f4.d': 'Eagle 式自由框选，一次选中一批。打标签、移动、删除，几十张图一个手势搞定。',
-    'f5.t': '智能主色提取',
-    'f5.d': '自动为每张图提取主色板，想要的颜色氛围一眼锁定。',
-    'f6.t': '像素级大图查看',
-    'f6.d': '流畅缩放与平移的大图查看器，线稿、边缘、细节放大细看。',
-    'f7.t': '键盘优先操作',
-    'f7.d': '筛选、打标、导航全有快捷键——成百上千张图，手不用离开键盘。',
-    'f8.t': '三端原生适配',
-    'f8.d': '原生适配 Windows 10+、macOS 11+（Apple Silicon 与 Intel）与 Linux（AppImage）。',
-    'dl.title': '下载 YukiBox',
-    'dl.sub': '从发布页获取最新版本，几秒装好——你的图库始终属于你。',
-    'dl.latest': '最新版本：', 'dl.rec': '当前系统推荐',
-    'dl.win.fmt': 'Windows 10/11 · 64 位 · 安装包 (.exe)',
-    'dl.mac.fmt': 'Apple Silicon 与 Intel · (.dmg)',
-    'dl.linux.fmt': 'x86-64 · AppImage',
-    'dl.note': '所有构建均未签名——macOS 首次打开若被拦截，请右键 App →「打开」。源码与历史版本见 <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener">GitHub Releases</a>。',
-    'foot.left': '❄ YukiBox — 本地图片参考库 · MIT 许可',
-    'foot.source': '源码', 'foot.releases': '发布页'
-  },
-  en: {
-    'meta.title': 'YukiBox — Local-first image reference library for artists',
-    'meta.desc': 'YukiBox is a local-first, tag-based image reference manager for artists. Collect, tag and rediscover your visual references on Windows, macOS and Linux. No cloud, no account.',
-    'nav.features': 'Features', 'nav.download': 'Download', 'nav.github': 'GitHub', 'nav.cta': 'Download',
-    'hero.kicker': '❄ Local-first · Tag-based · Cross-platform',
-    'hero.h1': 'Your visual references,<br><span class="grad">boxed and organized.</span>',
-    'hero.sub': 'YukiBox is a local image reference library for artists. Collect artwork, tag it your way, and rediscover it in seconds — everything stays on your own machine.',
-    'hero.cta1': 'Get YukiBox', 'hero.cta2': 'See features',
-    'hero.meta': 'Free & open under MIT ·',
-    'mock.library': 'LIBRARY', 'mock.all': 'All images', 'mock.fav': '✦ favorite',
-    'mock.bgsky': 'bg · sky', 'mock.charpose': 'char · pose',
-    'mock.palette': 'palette', 'mock.anatomy': 'anatomy',
-    'feat.title': 'Everything a reference library should do',
-    'feat.sub': 'Built around one idea: your references are yours. No accounts, no upload, no lock-in — just fast local tools that stay out of your way.',
-    'f1.t': 'Local-first & private',
-    'f1.d': 'Images and the SQLite database live on your own disk. No account, no cloud, no telemetry — fully usable offline.',
-    'f2.t': 'Tag everything',
-    'f2.d': 'Hierarchical tags with categories. Drag images onto a tag to file them — with a confirmation step so nothing lands by accident.',
-    'f3.t': 'Drag & drop import',
-    'f3.d': 'Drop in files or entire folders. For every import you choose: copy into the library folder, or link images where they live.',
-    'f4.t': 'Marquee select & batch ops',
-    'f4.d': 'Eagle-style box selection across the grid. Tag, move or delete dozens of images in one gesture.',
-    'f5.t': 'Smart color extraction',
-    'f5.d': 'Dominant palettes are extracted from every image automatically — spot the right mood at a glance.',
-    'f6.t': 'Pixel-level viewer',
-    'f6.d': 'A smooth zoom & pan viewer for checking linework, edges and details up close.',
-    'f7.t': 'Keyboard-driven',
-    'f7.d': 'Shortcuts for filtering, tagging and navigation — organize hundreds of images without leaving the keyboard.',
-    'f8.t': 'Cross-platform',
-    'f8.d': 'Native builds for Windows 10+, macOS 11+ (Apple Silicon & Intel) and Linux (AppImage).',
-    'dl.title': 'Download YukiBox',
-    'dl.sub': 'Grab the latest build from the release page. Installs in seconds — your library stays yours.',
-    'dl.latest': 'Latest version:', 'dl.rec': 'Recommended',
-    'dl.win.fmt': 'Windows 10/11 · 64-bit · Installer (.exe)',
-    'dl.mac.fmt': 'Apple Silicon & Intel · (.dmg)',
-    'dl.linux.fmt': 'x86-64 · AppImage',
-    'dl.note': 'All builds are unsigned — on macOS you may need to right-click the app → Open on first launch. Source code and older versions live on <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener">GitHub Releases</a>.',
-    'foot.left': '❄ YukiBox — a local image reference library. MIT License.',
-    'foot.source': 'Source', 'foot.releases': 'Releases'
-  },
-  ja: {
-    'meta.title': 'YukiBox — アーティストのためのローカル画像リファレンス管理',
-    'meta.desc': 'YukiBox はローカル完結・タグベースの画像リファレンス管理アプリ。Windows / macOS / Linux でビジュアル資料を収集・タグ付け・すばやく検索。クラウドもアカウントも不要です。',
-    'nav.features': '機能', 'nav.download': 'ダウンロード', 'nav.github': 'GitHub', 'nav.cta': 'ダウンロード',
-    'hero.kicker': '❄ ローカル完結 · タグ管理 · クロスプラットフォーム',
-    'hero.h1': 'あなたのビジュアル資料を、<br><span class="grad">ひと箱に、整理して。</span>',
-    'hero.sub': 'YukiBox はアーティストのためのローカル画像リファレンスライブラリ。作品を集め、自分流にタグを付け、数秒で再発見——データはすべて自分の PC の中だけ。',
-    'hero.cta1': 'YukiBox を入手', 'hero.cta2': '機能を見る',
-    'hero.meta': 'MIT ライセンス · 無料 ·',
-    'mock.library': 'ライブラリ', 'mock.all': 'すべての画像', 'mock.fav': '✦ お気に入り',
-    'mock.bgsky': '背景 · 空', 'mock.charpose': 'キャラ · ポーズ',
-    'mock.palette': 'パレット', 'mock.anatomy': 'デッサン',
-    'feat.title': 'リファレンス集に必要な機能、すべてここに',
-    'feat.sub': '理念はひとつ：あなたの資料はあなたのもの。アカウント不要・アップロード不要・ロックインなし——軽快なローカルツールだけ。',
-    'f1.t': 'ローカル完結・プライベート',
-    'f1.d': '画像も SQLite データベースもすべて自分のディスク上。アカウント不要、クラウド不要、テレメトリなし——オフラインで完全動作。',
-    'f2.t': 'すべてにタグを',
-    'f2.d': '階層タグとカテゴリに対応。画像をタグにドラッグするだけで分類（確認ステップ付きで誤操作防止）。',
-    'f3.t': 'ドラッグ＆ドロップ取り込み',
-    'f3.d': 'ファイルもフォルダごともドロップするだけ。取り込みのたびに選択：ライブラリへコピー、または元の場所へリンク。',
-    'f4.t': 'なげなわ選択・一括操作',
-    'f4.d': 'Eagle 風のなげなわ選択。タグ付け・移動・削除を数十枚単位でひと操作で。',
-    'f5.t': 'スマート配色抽出',
-    'f5.d': '主要なパレットを画像から自動抽出。ほしい雰囲気の色がひと目で見つかる。',
-    'f6.t': 'ピクセル単位のビューア',
-    'f6.d': 'なめらかなズーム＆パンで、線画・輪郭・ディテールを拡大チェック。',
-    'f7.t': 'キーボードで操作',
-    'f7.d': 'フィルタ・タグ付け・移動にショートカット。数百枚の整理もキーボードから手を離さず。',
-    'f8.t': 'クロスプラットフォーム',
-    'f8.d': 'Windows 10+ / macOS 11+（Apple Silicon & Intel）/ Linux（AppImage）にネイティブ対応。',
-    'dl.title': 'YukiBox をダウンロード',
-    'dl.sub': 'リリースページから最新ビルドを取得。数秒でインストール完了——ライブラリはあなたのもののまま。',
-    'dl.latest': '最新バージョン：', 'dl.rec': 'おすすめ',
-    'dl.win.fmt': 'Windows 10/11 · 64bit · インストーラー (.exe)',
-    'dl.mac.fmt': 'Apple Silicon & Intel · (.dmg)',
-    'dl.linux.fmt': 'x86-64 · AppImage',
-    'dl.note': 'ビルドは未署名です——macOS 初回起動時にブロックされた場合は、アプリを右クリック →「開く」を実行してください。ソースコードと過去バージョンは <a href="https://github.com/mashiro-shirasaki/yukibox-release/releases" target="_blank" rel="noopener">GitHub Releases</a> にあります。',
-    'foot.left': '❄ YukiBox — ローカル画像リファレンスライブラリ · MIT ライセンス',
-    'foot.source': 'ソース', 'foot.releases': 'リリース'
-  }
-};
+      /* 默认英文：不再根据浏览器语言自动切换。
+         仅当用户手动点过语言按钮（localStorage 有记录）时才使用其选择。 */
+      function detect() {
+        var saved = null;
+        try { saved = localStorage.getItem(STORE_KEY); } catch (e) { }
+        if (saved && LANGS.indexOf(saved) >= 0) return saved;
+        return DEFAULT_LANG;
+      }
 
-(function () {
-  var LANGS = ['zh', 'en', 'ja'];
-  var STORE_KEY = 'yukibox-site-lang';
+      function apply(lang) {
+        document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang);
+        document.title = I18N[lang]['meta.title'];
+        var md = document.querySelector('meta[name="description"]');
+        if (md) md.setAttribute('content', I18N[lang]['meta.desc']);
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+          var k = el.getAttribute('data-i18n');
+          if (I18N[lang][k] != null) el.textContent = I18N[lang][k];
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+          var k = el.getAttribute('data-i18n-html');
+          if (I18N[lang][k] != null) el.innerHTML = I18N[lang][k];
+        });
+        document.querySelectorAll('.lang button').forEach(function (b) {
+          b.classList.toggle('on', b.getAttribute('data-lang') === lang);
+        });
+        try { localStorage.setItem(STORE_KEY, lang); } catch (e) { }
+      }
 
-  function detect() {
-    var saved = null;
-    try { saved = localStorage.getItem(STORE_KEY); } catch (e) {}
-    if (saved && LANGS.indexOf(saved) >= 0) return saved;
-    var list = (navigator.languages && navigator.languages.length)
-      ? navigator.languages : [navigator.language || 'en'];
-    for (var i = 0; i < list.length; i++) {
-      var l = (list[i] || '').toLowerCase();
-      if (l.indexOf('zh') === 0) return 'zh';
-      if (l.indexOf('ja') === 0) return 'ja';
-    }
-    return 'en';
-  }
+      document.querySelectorAll('.lang button').forEach(function (b) {
+        b.addEventListener('click', function () { apply(b.getAttribute('data-lang')); });
+      });
+      apply(detect());
 
-  function apply(lang) {
-    document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : lang);
-    document.title = I18N[lang]['meta.title'];
-    var md = document.querySelector('meta[name="description"]');
-    if (md) md.setAttribute('content', I18N[lang]['meta.desc']);
-    document.querySelectorAll('[data-i18n]').forEach(function (el) {
-      var k = el.getAttribute('data-i18n');
-      if (I18N[lang][k] != null) el.textContent = I18N[lang][k];
-    });
-    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
-      var k = el.getAttribute('data-i18n-html');
-      if (I18N[lang][k] != null) el.innerHTML = I18N[lang][k];
-    });
-    document.querySelectorAll('.lang button').forEach(function (b) {
-      b.classList.toggle('on', b.getAttribute('data-lang') === lang);
-    });
-    try { localStorage.setItem(STORE_KEY, lang); } catch (e) {}
-  }
+      /* Mark the download card matching the visitor's OS */
+      var ua = navigator.userAgent;
+      var os = /Win/i.test(ua) ? 'win' : /Mac/i.test(ua) ? 'mac' : (/Linux|X11/i.test(ua) ? 'linux' : null);
+      if (os) {
+        var card = document.querySelector('.dl-card[data-os="' + os + '"]');
+        if (card) card.classList.add('rec');
+      }
 
-  document.querySelectorAll('.lang button').forEach(function (b) {
-    b.addEventListener('click', function () { apply(b.getAttribute('data-lang')); });
-  });
-  apply(detect());
-
-  /* Mark the download card matching the visitor's OS */
-  var ua = navigator.userAgent;
-  var os = /Win/i.test(ua) ? 'win' : /Mac/i.test(ua) ? 'mac' : (/Linux|X11/i.test(ua) ? 'linux' : null);
-  if (os) {
-    var card = document.querySelector('.dl-card[data-os="' + os + '"]');
-    if (card) card.classList.add('rec');
-  }
-
-  /* Live version number from the release repo; silent fallback if rate-limited */
-  fetch('https://api.github.com/repos/mashiro-shirasaki/yukibox-release/releases/latest')
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (d) {
-      if (!d || !d.tag_name) return;
-      var v = d.tag_name.replace(/^yukibox\//, '').replace(/^v/, '');
-      document.querySelectorAll('.js-version').forEach(function (el) { el.textContent = 'v' + v; });
-    })
-    .catch(function () {});
-})();
-</script>
+      /* Live version number from the release repo; silent fallback if rate-limited */
+      fetch('https://api.github.com/repos/mashiro-shirasaki/yukibox-release/releases/latest')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.tag_name) return;
+          var v = d.tag_name.replace(/^yukibox\//, '').replace(/^v/, '');
+          document.querySelectorAll('.js-version').forEach(function (el) { el.textContent = 'v' + v; });
+        })
+        .catch(function () { });
+    })();
+  </script>
 </body>
+
 </html>
